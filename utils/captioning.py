@@ -26,7 +26,7 @@ def caption_image(img_fn, image_size, model, device):
         # caption = model.generate(image, sample=True, top_p=0.9, max_length=20, min_length=5) 
         print('caption: '+caption[0])
     torch.cuda.empty_cache()
-    return {"source": img_fn, "prompt": caption[0]}
+    return {"target": img_fn, "prompt": caption[0]}
 
 
 def parallel_caption_images(img_fns, image_size, model, device):
