@@ -184,6 +184,7 @@ def blip_feature_extractor(pretrained='',**kwargs):
     return model        
 
 def init_tokenizer():
+    # If there is a problem with Locking, save the tokens and tokenizer from a local machine using tokenizer.save_pretrained(fname)
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     tokenizer.add_special_tokens({'bos_token':'[DEC]'})
     tokenizer.add_special_tokens({'additional_special_tokens':['[ENC]']})       
