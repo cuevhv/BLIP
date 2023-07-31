@@ -19,7 +19,7 @@ def args():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--model_fn', type=str, default=None)
     argparser.add_argument('--file_fn', type=str, help="either file with images or single image")
-    argparser.add_argument('--out_json_fn', type=str, help="output file name in json format")
+    argparser.add_argument('--out_json_fn', type=str, help="output file name in json format", default="prompt.json")
     argparser.add_argument('--parallel', action='store_true', help="parallelize the captioning process")
     return argparser.parse_args()
 
@@ -56,8 +56,9 @@ def main(cfg):
         imgs_captions_list = caption_images(img_fns, model, image_size, device)
     print("It took to process the data: ", str(datetime.timedelta(seconds=time.time()-s_time)))
     
-
-    with open(cfg.out_json_fn, 'w') as file:
+    out_fn = os.path.join(os.path.dirname(cfg.file_fn), cfg.out_json_fn)
+    
+    with open(out_fn, 'w') as file:
         for entry in imgs_captions_list:
             json.dump(entry, file)
             file.write('\n')
