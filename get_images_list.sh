@@ -1,4 +1,5 @@
 #!/bin/bash
+# ./get_images_list.sh dataset/evermotion_dataset out_list.txt
 
 # Check if the number of arguments is correct
 if [ $# -ne 2 ]; then
