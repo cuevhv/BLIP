@@ -47,7 +47,9 @@ def main(cfg):
     img_fns = get_file_names(cfg.file_fn)
     print(f"total number of images: {len(img_fns)}")
     print("starting the captioning process...")
-    
+
+    os.makedirs("logs/done", exist_ok=True)
+
     if cfg.parallel:
         s_time = time.time()
         imgs_captions_list = parallel_caption_images(img_fns, image_size, model, device)
@@ -55,9 +57,9 @@ def main(cfg):
         s_time = time.time()
         imgs_captions_list = caption_images(img_fns, model, image_size, device)
     print("It took to process the data: ", str(datetime.timedelta(seconds=time.time()-s_time)))
-    
+
     out_fn = os.path.join(os.path.dirname(cfg.file_fn), cfg.out_json_fn)
-    
+
     with open(out_fn, 'w') as file:
         for entry in imgs_captions_list:
             json.dump(entry, file)
