@@ -10,7 +10,12 @@ import time
 import datetime
 
 from utils.captioning import parallel_caption_images, caption_images
+import transformers
 
+try:
+    from transformers import AutoProcessor, Blip2ForConditionalGeneration
+except:
+    print("Wrong transformer version, transformers version: ", transformers.__version__)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -21,6 +26,8 @@ def args():
     argparser.add_argument('--file_fn', type=str, help="either file with images or single image")
     argparser.add_argument('--out_json_fn', type=str, help="output file name in json format", default="prompt.json")
     argparser.add_argument('--parallel', action='store_true', help="parallelize the captioning process")
+    argparser.add_argument('--blip_version', type=str, default='1', help="parallelize the captioning process")
+
     return argparser.parse_args()
 
 
@@ -38,9 +45,17 @@ def get_file_names(file_fn: str):
 
 
 def main(cfg):
-    image_size = 384
-    model_url = 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_capfilt_large.pth'
-    model = blip_decoder(pretrained=model_url, image_size=image_size, vit='base')
+    if cfg.blip_version == '1':
+        image_size = 384
+        model_url = 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_capfilt_large.pth'
+        model = blip_decoder(pretrained=model_url, image_size=image_size, vit='base')
+        processor = None
+
+    elif cfg.blip_version == '2':
+        image_size = 0
+        precision = torch.float16
+        processor = AutoProcessor.from_pretrained("Salesforce/blip2-opt-2.7b")
+        model = Blip2ForConditionalGeneration.from_pretrained("Salesforce/blip2-opt-2.7b", torch_dtype=precision)
     model.eval()
     model = model.to(device)
 
@@ -52,10 +67,10 @@ def main(cfg):
 
     if cfg.parallel:
         s_time = time.time()
-        imgs_captions_list = parallel_caption_images(img_fns, image_size, model, device)
+        imgs_captions_list = parallel_caption_images(img_fns, image_size, model, processor, device)
     else:
         s_time = time.time()
-        imgs_captions_list = caption_images(img_fns, model, image_size, device)
+        imgs_captions_list = caption_images(img_fns, model, image_size, processor, device)
     print("It took to process the data: ", str(datetime.timedelta(seconds=time.time()-s_time)))
 
     out_fn = os.path.join(os.path.dirname(cfg.file_fn), cfg.out_json_fn)
