@@ -13,12 +13,11 @@ model.eval()
 model.to(device)
 
 image = Image.open("/home/hcuevas/Documents/work/gen_bedlam/datasets/20230804_1_3000_hdri/png_untar/20230804_1_3000_hdri_png.0/20230804_1_3000_hdri/png/seq_000001/seq_000001_0010.png").convert('RGB')
-
+image = [image, image, image]
 s_time = time.time()
 inputs = processor(image, return_tensors="pt").to(device, precision)
 with torch.no_grad():
-    for i in range(20):
-        generated_ids = model.generate(**inputs, max_new_tokens=20)
-        generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0].strip()
-        print(generated_text)
+    generated_ids = model.generate(**inputs, max_new_tokens=20)
+    generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)#[0].strip()
+    print(generated_text)
 print("It took to process the data: ", str(time.time()-s_time))
