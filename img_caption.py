@@ -1,4 +1,5 @@
 """python img_caption.py --file_fn dataset/evermotion_dataset/out_list.txt --out_json_fn out.json --parallel
+   TRANSFORMERS_OFFLINE=1 python img_caption.py --file_fn dataset/evermotion_dataset/out_list.txt --out_json_fn out.json --blip_version 2 --parallel
 """
 import torch
 import torch.multiprocessing as mp
@@ -9,7 +10,7 @@ import json
 import time
 import datetime
 
-from utils.captioning import parallel_caption_images, caption_images
+from utils.captioning import parallel_caption_images, caption_images, caption_images_blip2
 import transformers
 
 try:
@@ -65,12 +66,19 @@ def main(cfg):
 
     os.makedirs("logs/done", exist_ok=True)
 
-    if cfg.parallel:
-        s_time = time.time()
-        imgs_captions_list = parallel_caption_images(img_fns, image_size, model, processor, device)
+    s_time = time.time()
+    if cfg.blip_version == '1':
+        if cfg.parallel:
+            imgs_captions_list = parallel_caption_images(img_fns, image_size, model, processor, device)
+        else:
+            imgs_captions_list = caption_images(img_fns, model, image_size, processor, device)
+
+    elif cfg.blip_version == '2':
+        batch_size = 128
+        imgs_captions_list = caption_images_blip2(img_fns, model, processor, batch_size, device)
+
     else:
-        s_time = time.time()
-        imgs_captions_list = caption_images(img_fns, model, image_size, processor, device)
+        raise ValueError(f"blip version {cfg.blip_version} not supported")
     print("It took to process the data: ", str(datetime.timedelta(seconds=time.time()-s_time)))
 
     out_fn = os.path.join(os.path.dirname(cfg.file_fn), cfg.out_json_fn)

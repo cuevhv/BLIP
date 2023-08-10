@@ -52,4 +52,26 @@ def caption_images(img_fns, model, image_size, processor, device):
         img_caption_dict = caption_image(idx, img_fn, image_size, model, processor, device)
         imgs_captions_list.append(img_caption_dict)
 
+
+def parallelize_images(img_fn):
+    return Image.open(img_fn).convert('RGB')
+
+
+def caption_images_blip2(img_fns, model, processor, batch_size, device):
+    imgs_captions_list = []
+    split_img_fns = [img_fns[i:i + batch_size] for i in range(0, len(img_fns), batch_size)]
+    for i, img_fns_batch in enumerate(split_img_fns):
+        with Pool() as pool:
+            imgs = pool.map(parallelize_images, img_fns_batch)
+
+        inputs = processor(imgs, return_tensors="pt").to(device, torch.float16)
+        generated_ids = model.generate(**inputs, max_new_tokens=20)
+        captions = processor.batch_decode(generated_ids, skip_special_tokens=True)
+        for j, caption in enumerate(captions):
+            img_caption_dict = {"target": img_fns_batch[j], "prompt": caption.strip()}
+            imgs_captions_list.append(img_caption_dict)
+            # print(i*batch_size+j, img_caption_dict)
+            with open(f'logs/done/{int(i*batch_size+j)}.txt', 'w') as f:
+                f.write(f"")
+
     return imgs_captions_list
