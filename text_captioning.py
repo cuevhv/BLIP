@@ -6,6 +6,7 @@ import argparse
 import os
 import warnings
 import json
+import time
 
 warnings.filterwarnings('ignore')
 
@@ -89,6 +90,7 @@ if __name__ == '__main__':
 
     ouput_data = {"image": [], "text": []}
 
+    time_s = time.time()
     for i in range(0, len(images_fns), args.bath_size):
         images = images_fns[i:i+args.bath_size]
         images = [Image.open(image).convert('RGB') for image in images]
@@ -109,6 +111,7 @@ if __name__ == '__main__':
 
         ouput_data["image"].extend(images_fns[i:i+args.bath_size])
         ouput_data["text"].extend(answers)
+    print(f"{len(images_fns)} files took : {time.time() - time_s} secs")
 
 
     with open(args.out_json_fn, 'w') as file:
