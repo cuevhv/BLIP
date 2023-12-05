@@ -1,5 +1,6 @@
 """python img_caption.py --file_fn dataset/evermotion_dataset/out_list.txt --out_json_fn out.json --parallel
-   TRANSFORMERS_OFFLINE=1 python img_caption.py --file_fn dataset/evermotion_dataset/out_list.txt --out_json_fn out.json --blip_version 2 --parallel
+   TRANSFORMERS_OFFLINE=1 python img_caption.py --file_fn dataset/20230804_1_3000_hdri/dataset_imgs_list.txt --out_json_fn out.json \
+    --blip_version 2 --parallel
 """
 import torch
 import torch.multiprocessing as mp
