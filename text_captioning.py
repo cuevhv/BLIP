@@ -76,6 +76,9 @@ if __name__ == '__main__':
     query = ("Describe the person in the scene, what the person is wearing. "
             "If there is a green screen, don't describe the green screen."
             "If there is a head band, don't descbre the head band.")
+    # query = ("what is the person wearing and the gender? "
+    #         "If there is a green screen, don't describe the green screen."
+    #         "If there is a head band, don't descbre the head band.")
 
     if args.img_txt.endswith((".png", ".jpg", ".jpeg")):
         images_fns = [args.img_txt]
