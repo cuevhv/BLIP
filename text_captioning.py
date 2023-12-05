@@ -1,4 +1,5 @@
 import torch
+import torch.multiprocessing as mp
 import requests
 from PIL import Image
 from transformers import AutoModelForCausalLM, LlamaTokenizer
@@ -7,6 +8,7 @@ import os
 import warnings
 import json
 import time
+from multiprocessing.pool import Pool
 
 warnings.filterwarnings('ignore')
 
@@ -66,6 +68,8 @@ def create_model():
     ).eval()
     return model, tokenizer
 
+def parallelize_images(img_fn):
+    return Image.open(img_fn).convert('RGB')
 
 "/home/hcuevas/Desktop/01186.jpg"
 
@@ -93,7 +97,9 @@ if __name__ == '__main__':
     time_s = time.time()
     for i in range(0, len(images_fns), args.bath_size):
         images = images_fns[i:i+args.bath_size]
-        images = [Image.open(image).convert('RGB') for image in images]
+        # images = [Image.open(image).convert('RGB') for image in images]
+        with Pool() as pool:
+            images = pool.map(parallelize_images, images)
 
         gen_kwargs = {"max_length": 2048, "do_sample": True,
                     "top_p": 0.4, "top_k": 5, "temperature": 0.8,
